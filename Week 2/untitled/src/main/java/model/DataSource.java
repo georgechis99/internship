@@ -109,6 +109,64 @@ public class DataSource {
         }
     }
 
+    public boolean openHikari() {
+        try {
+            Class.forName(JDBC_DRIVER);
+            conn = HikariConnectionPool.getConnection();
+
+            try (Statement statement = conn.createStatement()) {
+                statement.execute("USE " + DB_NAME);
+            }
+            System.out.println("Connection successful! (HIKARI)");
+            return true;
+        } catch (ClassNotFoundException e) {
+            System.out.println("ClassNotFoundException caught...");
+            return false;
+        } catch (SQLException e) {
+            System.out.println("Couldn't connect to database...");
+            return false;
+        }
+    }
+
+    public void close() {
+        try {
+            if (queryAuthorsByNamePreparedStatement != null) {
+                queryAuthorsByNamePreparedStatement.close();
+            }
+            if (queryBooksByTitlePreparedStatement != null) {
+                queryBooksByTitlePreparedStatement.close();
+            }
+            if (filterBooksByPrice != null) {
+                filterBooksByPrice.close();
+            }
+            if (orderBooksByPrice != null) {
+                orderBooksByPrice.close();
+            }
+            if (queryAuthors != null) {
+                queryAuthors.close();
+            }
+            if (insertIntoAuthors != null) {
+                insertIntoAuthors.close();
+            }
+            if (queryBooks != null) {
+                queryBooks.close();
+            }
+            if (insertIntoBooks != null) {
+                insertIntoBooks.close();
+            }
+            if (deleteFromBooks != null) {
+                deleteFromBooks.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+            System.out.println("Connection closed successfully!");
+        } catch (SQLException e) {
+            System.out.println("Couldn't execute .close() method");
+            System.out.println(e.getMessage());
+        }
+    }
+
     public List<Author> queryAllAuthors() {
         try (Statement statement = conn.createStatement();
              ResultSet resultSet = statement.executeQuery(SELECT_AUTHORS)) {
