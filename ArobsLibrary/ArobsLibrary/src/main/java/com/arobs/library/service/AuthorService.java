@@ -1,19 +1,17 @@
 package com.arobs.library.service;
 
-import com.arobs.library.model.book.dto.AuthorDTO;
-import com.arobs.library.model.book.dto.BookDTO;
-import com.arobs.library.model.book.entity.Author;
-import com.arobs.library.model.book.entity.Book;
-import com.arobs.library.model.book.mapper.AuthorMapper;
-import com.arobs.library.model.book.repository.AuthorRepository;
+import com.arobs.library.model.dto.AuthorDTO;
+import com.arobs.library.model.entity.Author;
+import com.arobs.library.model.mapper.AuthorMapper;
+import com.arobs.library.model.repository.AuthorRepository;
+import org.hibernate.DuplicateMappingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @Validated
@@ -29,13 +27,9 @@ public class AuthorService {
     }
 
     @Transactional
-    public Set<AuthorDTO> findAll() {
+    public List<AuthorDTO> findAll() {
         List<Author> authors = authorRepository.findAll();
-        Set<AuthorDTO> authorDTOs = new HashSet<>();
-        for (Author author : authors) {
-            authorDTOs.add(authorMapper.toDTO(author));
-        }
-        return authorDTOs;
+        return toDTOList(authors);
     }
 
     @Transactional
@@ -45,9 +39,23 @@ public class AuthorService {
 
     @Transactional
     public AuthorDTO saveAuthor(AuthorDTO authorDTO){
+        if(isAuthorEnlisted(authorDTO.getName())){
+            throw new DuplicateMappingException(DuplicateMappingException.Type.ENTITY, "for Author");
+        }
         Author author = new Author();
         author.setName(authorDTO.getName());
-//        author.setBooks(new HashSet<>());
         return authorMapper.toDTO(authorRepository.save(author));
+    }
+
+    private boolean isAuthorEnlisted(String name) {
+        return authorRepository.findByName(name) != null;
+    }
+
+    private List<AuthorDTO> toDTOList(List<Author> authors){
+        List<AuthorDTO> dtoList = new ArrayList<>();
+        for (Author author : authors) {
+            dtoList.add(authorMapper.toDTO(author));
+        }
+        return dtoList;
     }
 }

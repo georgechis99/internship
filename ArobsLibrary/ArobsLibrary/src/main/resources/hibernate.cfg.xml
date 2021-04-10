@@ -11,11 +11,11 @@
         <property name="hibernate.connection.password">12345678</property>
         <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
         <property name="show_sql">true</property>
-        <property name="hibernate.format_sql" value="true" />
-        <mapping class="com.arobs.library.model.book.entity.Book"/>
-        <mapping class="com.arobs.library.model.book.entity.Tag"/>
-        <mapping class="com.arobs.library.model.book.entity.Author"/>
-        <mapping class="com.arobs.library.model.book.entity.Copy"/>
-        <mapping class="com.arobs.library.model.employee.entity.Employee"/>
+        <mapping class="com.arobs.library.model.entity.Book"/>
+        <mapping class="com.arobs.library.model.entity.Tag"/>
+        <mapping class="com.arobs.library.model.entity.Author"/>
+        <mapping class="com.arobs.library.model.entity.Copy"/>
+        <mapping class="com.arobs.library.model.entity.Employee"/>
+        <mapping class="com.arobs.library.model.entity.BookRent"/>
     </session-factory>
 </hibernate-configuration>

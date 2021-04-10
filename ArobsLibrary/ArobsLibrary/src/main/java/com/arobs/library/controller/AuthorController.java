@@ -1,16 +1,12 @@
 package com.arobs.library.controller;
 
-import com.arobs.library.model.book.dto.AuthorDTO;
-import com.arobs.library.model.book.dto.BookDTO;
-import com.arobs.library.model.book.entity.Author;
+import com.arobs.library.model.dto.AuthorDTO;
 import com.arobs.library.service.AuthorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
-import java.util.Set;
 
 @RequestMapping(value = "/authors")
 @RestController
@@ -30,7 +26,7 @@ public class AuthorController {
     }
 
     @GetMapping("/findAll")
-    public Set<AuthorDTO> findAllAuthors() {
+    public List<AuthorDTO> findAllAuthors() {
         return authorService.findAll();
     }
 

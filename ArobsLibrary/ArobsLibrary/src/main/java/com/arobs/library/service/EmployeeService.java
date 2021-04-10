@@ -1,18 +1,19 @@
 package com.arobs.library.service;
 
-import com.arobs.library.model.book.dto.BookDTO;
-import com.arobs.library.model.book.entity.Book;
-import com.arobs.library.model.employee.dto.EmployeeDTO;
-import com.arobs.library.model.employee.entity.Employee;
-import com.arobs.library.model.employee.helper.UserRole;
-import com.arobs.library.model.employee.mapper.EmployeeMapper;
-import com.arobs.library.model.employee.repository.EmployeeRepository;
+import com.arobs.library.model.dto.EmployeeDTO;
+import com.arobs.library.model.entity.Employee;
+import com.arobs.library.model.helper.UserRole;
+import com.arobs.library.model.mapper.EmployeeMapper;
+import com.arobs.library.model.repository.EmployeeRepository;
+import org.hibernate.DuplicateMappingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.sql.Date;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,7 +53,10 @@ public class EmployeeService {
     }
 
     @Transactional
-    public EmployeeDTO addEmployee(EmployeeDTO employeeDTO) {
+    public EmployeeDTO saveEmployee(EmployeeDTO employeeDTO) {
+        if(isEmployeeEnlisted(employeeDTO.getName())){
+            throw new DuplicateMappingException(DuplicateMappingException.Type.ENTITY, "for Employee");
+        }
         Employee employee = employeeMapper.toEntity(employeeDTO);
         return employeeMapper.toDTO(employeeRepository.save(employee));
     }
@@ -62,8 +66,13 @@ public class EmployeeService {
         int id = employeeDTO.getId();
         Employee foundEmployee = employeeRepository.findById(id)
                 .orElseThrow(() -> new EmptyResultDataAccessException(1));
+        setEntityFields(foundEmployee,employeeDTO);
         employeeRepository.save(foundEmployee);
         return employeeMapper.toDTO(foundEmployee);
+    }
+
+    private boolean isEmployeeEnlisted(String name) {
+        return employeeRepository.findByName(name) != null;
     }
 
     private boolean isAdmin(EmployeeDTO employeeDTO){
@@ -72,5 +81,13 @@ public class EmployeeService {
 
     private boolean isAdmin(Employee employee){
         return employee.getRole().equals(UserRole.admin);
+    }
+
+    private void setEntityFields(Employee employee, EmployeeDTO employeeDTO) {
+        employee.setName(employeeDTO.getName());
+        employee.setRole(employeeDTO.getRole());
+        employee.setPassword(employeeDTO.getPassword());
+        employee.setEmail(employeeDTO.getEmail());
+        employee.setBanEndDate(employeeDTO.getBanEndDate());
     }
 }

@@ -1,16 +1,15 @@
 package com.arobs.library.controller;
 
-import com.arobs.library.model.book.dto.BookDTO;
-import com.arobs.library.model.book.dto.BookViewDTO;
+import com.arobs.library.model.dto.BookDTO;
+import com.arobs.library.model.dto.BookViewDTO;
 import com.arobs.library.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.sql.Date;
 import java.util.Calendar;
-import java.util.Set;
+import java.util.List;
 
 @RequestMapping(value = "/books")
 @RestController
@@ -35,22 +34,22 @@ public class BookController {
     }
 
     @GetMapping("/findAll")
-    public Set<BookDTO> findAllBooks() {
+    public List<BookDTO> findAllBooks() {
         return bookService.findAll();
     }
 
     @GetMapping("/viewFindAll")
-    public Set<BookViewDTO> viewFindAllBooks() {
+    public List<BookViewDTO> viewFindAllBooks() {
         return bookService.viewFindAll();
     }
 
     @GetMapping("/findByTags/{tagNames}")
-    public Set<BookDTO> findBooksByTags(@RequestParam(value = "tagNames") String[] tagNames) {
+    public List<BookDTO> findBooksByTags(@RequestParam(value = "tagNames") String[] tagNames) {
         return bookService.findByTags(tagNames);
     }
 
     @GetMapping("/findByAuthors/{authorNames}")
-    public Set<BookDTO> findBooksByAuthors(@RequestParam(value = "authorNames") String[] authorNames) {
+    public List<BookDTO> findBooksByAuthors(@RequestParam(value = "authorNames") String[] authorNames) {
         return bookService.findByAuthors(authorNames);
     }
 

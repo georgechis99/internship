@@ -1,6 +1,6 @@
 package com.arobs.library.controller;
 
-import com.arobs.library.model.employee.dto.EmployeeDTO;
+import com.arobs.library.model.dto.EmployeeDTO;
 import com.arobs.library.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -17,7 +17,6 @@ public class EmployeeController {
     private EmployeeService employeeService;
 
     @Autowired
-
     public EmployeeController(EmployeeService employeeService) {
         this.employeeService = employeeService;
     }
@@ -39,7 +38,7 @@ public class EmployeeController {
 
     @PostMapping
     public EmployeeDTO saveEmployee(@Valid @RequestBody EmployeeDTO employeeDTO) {
-        return employeeService.addEmployee(employeeDTO);
+        return employeeService.saveEmployee(employeeDTO);
     }
 
     @PutMapping("/{id}")
