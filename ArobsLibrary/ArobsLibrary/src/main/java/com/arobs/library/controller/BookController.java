@@ -59,7 +59,7 @@ public class BookController {
     }
 
     @PostMapping
-    public BookDTO saveBook( @RequestBody BookDTO bookDTO) {
+    public BookDTO saveBook(@RequestBody BookDTO bookDTO) {
         Date currentDate = new Date(Calendar.getInstance().getTime().getTime());
         bookDTO.setAddedDate(currentDate);
         return bookService.saveBook(bookDTO);

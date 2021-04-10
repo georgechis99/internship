@@ -54,9 +54,9 @@ public class EmployeeService {
 
     @Transactional
     public EmployeeDTO saveEmployee(EmployeeDTO employeeDTO) {
-        if(isEmployeeEnlisted(employeeDTO.getName())){
-            throw new DuplicateMappingException(DuplicateMappingException.Type.ENTITY, "for Employee");
-        }
+//        if(isEmployeeEnlisted(employeeDTO.getName())){
+//            throw new DuplicateMappingException(DuplicateMappingException.Type.ENTITY, "for Employee");
+//        }
         Employee employee = employeeMapper.toEntity(employeeDTO);
         return employeeMapper.toDTO(employeeRepository.save(employee));
     }

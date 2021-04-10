@@ -2,6 +2,7 @@ package com.arobs.library.model.dto;
 
 import com.arobs.library.model.helper.UserRole;
 
+import javax.validation.constraints.Email;
 import java.sql.Date;
 
 public class EmployeeDTO {
@@ -10,6 +11,8 @@ public class EmployeeDTO {
     private String name;
     private UserRole role;
     private String password;
+
+    @Email
     private String email;
     private Date banEndDate;
 

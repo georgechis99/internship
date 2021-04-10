@@ -50,11 +50,23 @@ public class BookRentService {
     }
 
     @Transactional
-    public BookRentDTO markAsLate(BookRentDTO bookRentDTO) {
-        BookRent bookRent = bookRentMapper.toEntity(bookRentDTO);
-        setEntityFields(bookRent, bookRentDTO);
+    public void markAsLate(int bookRentId) {
+        BookRent bookRent = validateBookRent(bookRentId);
         bookRent.setStatus(BookRentStatus.late);
-        return bookRentMapper.toDTO(bookRentRepository.save(bookRent));
+        bookRentRepository.save(bookRent);
+    }
+
+    @Transactional
+    public void systemCheckForLateBookRents() {
+        List<BookRentDTO> allBookRents = findAll();
+        for (BookRentDTO bookRentDTO : allBookRents) {
+            Date returnDate = bookRentDTO.getReturnDate();
+            if (isPastDate(returnDate)) {
+                if (bookRentDTO.getStatus().equals(BookRentStatus.ongoing)) {
+                    markAsLate(bookRentDTO.getId());
+                }
+            }
+        }
     }
 
     @Transactional
@@ -70,7 +82,7 @@ public class BookRentService {
         bookRent.setCopy(copy);
 
         Date currentDate = getCurrentDate();
-        Date futureDate = datePlus30Days(currentDate);
+        Date futureDate = sqlDatePlusDays(currentDate,30);
         bookRent.setRentalDate(currentDate);
         bookRent.setReturnDate(futureDate);
         bookRent.setStatus(BookRentStatus.ongoing);
@@ -81,7 +93,7 @@ public class BookRentService {
 
     @Transactional
     public BookRentDTO returnBook(int bookRentId, Integer rating, String noteAtReturn) {
-        BookRent bookRent = validateBookRentForReturn(bookRentId);
+        BookRent bookRent = validateBookRentOngoing(bookRentId);
 
         Copy copy = bookRent.getCopy();
         copy.setStatus(CopyStatus.available);
@@ -100,7 +112,20 @@ public class BookRentService {
         return bookRentMapper.toDTO(bookRentRepository.save(bookRent));
     }
 
-    private void banEmployee(Employee employee, long lateDays){
+    @Transactional
+    public BookRentDTO extendRental(int bookRentId) {
+        BookRent bookRent = validateBookRentOngoing(bookRentId);
+        Date rentalDate = bookRent.getRentalDate();
+        Date newReturnDate = sqlDatePlusDays(bookRent.getReturnDate(), 15);
+        if (getDaysDifference(rentalDate, newReturnDate) > 90) {
+            throw new EmployeeException("Cannot extend rental. Employee has exceeded the 90 days limit");
+        } else {
+            bookRent.setReturnDate(newReturnDate);
+        }
+        return bookRentMapper.toDTO(bookRentRepository.save(bookRent));
+    }
+
+    private void banEmployee(Employee employee, long lateDays) {
         long banDays;
         if (lateDays < 5) {
             banDays = 10;
@@ -123,11 +148,11 @@ public class BookRentService {
         return foundBookRent.get();
     }
 
-    private BookRent validateBookRentForReturn(int bookRentId) {
+    private BookRent validateBookRentOngoing(int bookRentId) {
         BookRent bookRent = validateBookRent(bookRentId);
-        if(bookRent.getStatus().equals(BookRentStatus.ongoing)){
+        if (bookRent.getStatus().equals(BookRentStatus.ongoing)) {
             return bookRent;
-        }else{
+        } else {
             throw new InvalidInputException("Book rent " + bookRentId + " must have status 'ongoing'");
         }
 
@@ -155,14 +180,14 @@ public class BookRentService {
     private Copy getAvailableCopy(Book book) {
         Set<Copy> copies = book.getCopies();
         for (Copy copy : copies) {
-            if (isCopyValid(copy)) {
+            if (isCopyAvailable(copy)) {
                 return copy;
             }
         }
         throw new ResourceNotFoundException("There are no copies available for book " + book.getId());
     }
 
-    private boolean isCopyValid(Copy copy) {
+    private boolean isCopyAvailable(Copy copy) {
         if (copy == null) {
             return false;
         }
@@ -180,17 +205,13 @@ public class BookRentService {
         return banEndDate.compareTo(currentDate) > 0;
     }
 
-    public long getDaysDifference(Date d1, Date d2) {
-        long diff = d2.getTime() - d1.getTime();
+    private long getDaysDifference(Date pastDate, Date futureDate) {
+        long diff = futureDate.getTime() - pastDate.getTime();
         return TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
     }
 
     private Date sqlDatePlusDays(Date date, int days) {
         return Date.valueOf(date.toLocalDate().plusDays(days));
-    }
-
-    private Date datePlus30Days(Date date) {
-        return Date.valueOf(date.toLocalDate().plusDays(30));
     }
 
     private Date getCurrentDate() {
@@ -203,18 +224,6 @@ public class BookRentService {
             dtoList.add(bookRentMapper.toDTO(bookRent));
         }
         return dtoList;
-    }
-
-    private void setEntityFields(BookRent bookRent, BookRentDTO bookRentDTO) {
-        bookRent.setEmployee(getEmployeeFromId(bookRent.getEmployeeId()));
-        bookRent.setBook(getBookFromId(bookRent.getBookId()));
-        bookRent.setCopy(getCopyFromId(bookRent.getCopyId()));
-
-        bookRent.setRentalDate(bookRentDTO.getRentalDate());
-        bookRent.setReturnDate(bookRentDTO.getReturnDate());
-        bookRent.setStatus(bookRentDTO.getStatus());
-        bookRent.setRating(bookRentDTO.getRating());
-        bookRent.setNoteAtReturn(bookRentDTO.getNoteAtReturn());
     }
 
     private Employee getEmployeeFromId(int employeeId) {

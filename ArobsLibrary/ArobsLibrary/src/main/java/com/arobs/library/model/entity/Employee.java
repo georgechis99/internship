@@ -60,7 +60,7 @@ public class Employee implements Serializable {
     }
 
     public void setRole(UserRole role) {
-        if(role == null){
+        if (role == null) {
             throw new IllegalStateException();
         }
         this.role = role;

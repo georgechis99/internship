@@ -11,7 +11,6 @@ import java.util.Set;
 
 @RequestMapping(value = "/employees")
 @RestController
-@Validated
 public class EmployeeController {
 
     private EmployeeService employeeService;

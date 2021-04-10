@@ -4,11 +4,9 @@ import com.arobs.library.model.helper.BookRentStatus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
-import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.sql.Date;
-import java.util.Optional;
 
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
@@ -132,13 +130,15 @@ public class BookRent {
     }
 
 
-    public int getEmployeeId(){
+    public int getEmployeeId() {
         return employee.getId();
     }
-    public int getBookId(){
+
+    public int getBookId() {
         return book.getId();
     }
-    public int getCopyId(){
+
+    public int getCopyId() {
         return copy.getId();
     }
 }
